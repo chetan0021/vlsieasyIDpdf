@@ -238,11 +238,14 @@
             <!-- ID CARD (Visible Preview) -->
             <div id="capture-area" class="mb-8 hidden">
                 <div id="id-card-container">
+                    <!-- Dynamic Backgrounds -->
                     <div class="tech-grid"></div>
                     <div class="circuit-bg"></div>
                     
+                    <!-- Header -->
                     <div class="relative z-20 pt-8 px-6 flex flex-col items-center gap-2">
                         <div class="flex items-center gap-2">
+                            <!-- Logo Image: Ensure "Logo.png" is in the root folder -->
                             <img src="Logo.png" alt="Logo" class="h-8 w-auto object-contain drop-shadow-md" onerror="this.style.display='none'">
                             <div class="text-2xl font-bold text-white tracking-wide drop-shadow-lg">
                                 VLSI<span class="text-cyan-300">easy</span>
@@ -251,17 +254,20 @@
                         <div class="h-0.5 w-12 bg-white/20 rounded-full"></div>
                     </div>
 
+                    <!-- Avatar -->
                     <div class="avatar-container">
                         <div class="avatar-img-box">
                             <img id="card-photo" src="" class="w-full h-full object-cover">
                         </div>
                     </div>
 
+                    <!-- Identity -->
                     <div class="text-center z-20 px-6 mb-2">
                         <h2 id="card-name" class="text-2xl font-bold text-white leading-tight mb-2 uppercase tracking-wide drop-shadow-md"></h2>
                         <div id="card-course-container" class="flex flex-wrap justify-center gap-1 opacity-90 max-h-12 overflow-hidden"></div>
                     </div>
 
+                    <!-- Glass Details Panel -->
                     <div class="glass-panel z-20">
                         <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-3">
                             <div>
@@ -317,9 +323,11 @@
         </div>
     </div>
 
-    <!-- Hidden Sandbox for Capture -->
+    <!-- Hidden Sandbox for Virtual Desktop Rendering -->
     <div id="export-sandbox">
-        <div id="sandbox-content" class="flex justify-center items-center h-full w-full"></div>
+        <div id="sandbox-content" class="flex justify-center items-center h-full w-full">
+            <!-- Clone will be injected here -->
+        </div>
     </div>
 
     <script>
@@ -412,6 +420,7 @@
                 }
             } catch (error) {
                 console.error(error);
+                // Demo Fallback for testing UI
                 if (email.includes('@')) {
                      document.getElementById('verify-section').classList.add('hidden');
                      userData = {
@@ -505,7 +514,7 @@
             }
         }
 
-        // --- FIXED DOWNLOAD LOGIC ---
+        // --- ROBUST DOWNLOAD LOGIC (CLIENT-SIDE) ---
         function downloadCard() {
             const cardElement = document.getElementById('id-card-container');
             const btn = document.querySelector('#download-actions button');
@@ -532,6 +541,26 @@
             clone.style.transform = 'none';
             clone.style.borderRadius = '0';
             
+            // Handle Logo: Ensure it captures by converting to Base64 in clone
+            const originalLogo = cardElement.querySelector('img[alt="Logo"]');
+            const clonedLogo = clone.querySelector('img[alt="Logo"]');
+
+            if (originalLogo && clonedLogo && originalLogo.complete && originalLogo.naturalHeight !== 0) {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = originalLogo.naturalWidth;
+                    canvas.height = originalLogo.naturalHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(originalLogo, 0, 0);
+                    clonedLogo.src = canvas.toDataURL();
+                    clonedLogo.style.display = 'block'; // Force show
+                } catch (e) {
+                    console.warn("Could not convert logo to base64 (CORS?)", e);
+                    // Fallback: just ensure src matches
+                    clonedLogo.src = originalLogo.src;
+                }
+            }
+
             // Prevent text wrap on clone
             const tags = clone.querySelectorAll('.course-tag');
             tags.forEach(tag => {
@@ -542,7 +571,6 @@
             sandboxContent.appendChild(clone);
             
             // Move sandbox into view for capture (Invisible to user via opacity)
-            // This fixes the "Blank Image" issue caused by off-screen rendering
             sandbox.style.top = '0';
             sandbox.style.left = '0';
             sandbox.style.opacity = '0'; 
@@ -556,8 +584,7 @@
                     width: 350,
                     height: 600,
                     windowWidth: 1440, // Desktop simulation
-                    logging: false,
-                    // Remove foreignObjectRendering as it can be unstable
+                    logging: false
                 }).then(canvas => {
                     const link = document.createElement('a');
                     link.download = `VLSI_ID_${userData.name.replace(/\s+/g, '_') || 'Student'}.png`;
