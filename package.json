@@ -1,0 +1,12 @@
+{
+  "name": "vlsieasy-id-generator",
+  "version": "1.0.0",
+  "description": "ID Card Generator with Puppeteer",
+  "scripts": {
+    "start": "node api/generate.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "^10.4.0",
+    "@sparticuz/chromium": "^109.0.5"
+  }
+}
