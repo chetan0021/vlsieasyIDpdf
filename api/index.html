@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VLSIeasy - ID Card Generator</title>
+    
+    <!-- TAILWIND -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FONTS & ICONS -->
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #02040a; color: #e2e8f0; }
+        
+        /* --- ID CARD CONTAINER --- */
+        #id-card-container {
+            width: 350px !important;
+            height: 600px !important;
+            min-width: 350px !important; 
+            min-height: 600px !important;
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            transition: all 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #0f172a;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            margin: 0 auto;
+        }
+        
+        /* --- BACKGROUND GRAPHICS --- */
+        .circuit-bg {
+            position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='350' height='600' viewBox='0 0 350 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M350 0 V600 M0 0 V600' stroke='none'/%3E%3Cpath d='M30 0 v50 l20 20 h50' stroke='rgba(255,255,255,0.05)' stroke-width='2' fill='none'/%3E%3Cpath d='M320 0 v80 l-30 30 h-40' stroke='rgba(255,255,255,0.05)' stroke-width='2' fill='none'/%3E%3Cpath d='M0 500 h40 l30 30 v70' stroke='rgba(255,255,255,0.05)' stroke-width='2' fill='none'/%3E%3Cpath d='M350 450 h-60 l-20 20 v130' stroke='rgba(255,255,255,0.05)' stroke-width='2' fill='none'/%3E%3Ccircle cx='50' cy='70' r='3' fill='rgba(255,255,255,0.1)'/%3E%3Ccircle cx='290' cy='110' r='3' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E");
+            z-index: 1; pointer-events: none;
+        }
+
+        .tech-grid {
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 35px 35px;
+            z-index: 0;
+        }
+
+        /* --- GLASS PANEL DETAILS --- */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+            border-radius: 24px 24px 0 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            z-index: 20; 
+        }
+
+        .avatar-container {
+            width: 130px; height: 130px;
+            border-radius: 50%;
+            padding: 4px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.05));
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin: 0 auto 1rem auto;
+            position: relative;
+            z-index: 10;
+        }
+        .avatar-img-box {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #0f172a;
+        }
+
+        .info-label {
+            font-family: 'Poppins', sans-serif;
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 2px;
+            white-space: nowrap;
+        }
+        .info-value {
+            font-size: 14px;
+            color: white;
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+        .email-value {
+            font-size: 12px; 
+            color: #cbd5e1; 
+            word-break: break-all;
+            line-height: 1.2;
+        }
+        
+        .course-tag {
+            font-size: 0.6rem; font-weight: 700;
+            padding: 3px 10px; border-radius: 4px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            display: inline-block; margin: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            flex-shrink: 0; 
+            min-width: max-content;
+            white-space: nowrap;
+        }
+        
+        #card-id {
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .loader {
+            border: 3px solid #1e293b;
+            border-top: 3px solid #22d3ee;
+            border-radius: 50%;
+            width: 20px; height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-10 px-4 bg-slate-950 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+
+    <header class="mb-10 text-center">
+        <h1 class="text-3xl font-bold text-white mb-2 font-[Rajdhani]">Student ID Generator</h1>
+        <p class="text-slate-400 text-sm font-[Poppins]">Verify your enrollment and get your official VLSIeasy ID</p>
+    </header>
+
+    <div class="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <!-- FORM SECTION -->
+        <div class="bg-slate-900/90 p-8 rounded-2xl border border-slate-700 shadow-2xl backdrop-blur-sm">
+            <!-- Verify Section -->
+            <div id="verify-section">
+                <h2 class="text-xl font-semibold text-white mb-6 flex items-center font-[Poppins]">
+                    <span class="bg-cyan-500 text-black w-6 h-6 rounded-full flex items-center justify-center text-xs mr-3 font-bold">1</span>
+                    Verify Enrollment
+                </h2>
+                <div class="space-y-4 font-[Poppins]">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Registered Email</label>
+                        <input type="email" id="input-email" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white focus:border-cyan-400 focus:outline-none placeholder-slate-600" placeholder="Enter the email you enrolled with">
+                    </div>
+                    <button onclick="verifyUser()" id="btn-verify" class="w-full bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-semibold py-3 rounded-lg transition-all flex justify-center items-center gap-2 shadow-lg shadow-cyan-900/50">
+                        Verify Status
+                        <div id="loader-verify" class="loader hidden"></div>
+                    </button>
+                    <p id="msg-verify" class="text-sm text-center hidden"></p>
+                </div>
+            </div>
+
+            <!-- Details Section -->
+            <div id="details-section" class="hidden animate-[fadeIn_0.5s_ease-out] font-[Poppins]">
+                <div class="flex items-center justify-between mb-6 border-b border-slate-700 pb-4 mt-6">
+                    <h2 class="text-xl font-semibold text-white flex items-center">
+                        <span class="bg-cyan-500 text-black w-6 h-6 rounded-full flex items-center justify-center text-xs mr-3 font-bold">2</span>
+                        Confirm Details
+                    </h2>
+                    <span class="text-green-400 text-xs font-mono bg-green-900/30 px-2 py-1 rounded border border-green-500/30">Verified</span>
+                </div>
+
+                <div class="space-y-4">
+                    <input type="hidden" id="input-name">
+                    <input type="hidden" id="input-phone">
+                    <input type="hidden" id="input-dob">
+                    <input type="hidden" id="input-course"> 
+                    <input type="hidden" id="input-gender">
+                    
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Discord ID (Optional)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-slate-500"><i class="fab fa-discord"></i></span>
+                            <input type="text" id="input-discord" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 pl-10 text-white focus:border-cyan-400 focus:outline-none" placeholder="username#1234">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Upload Photo</label>
+                        <div class="border-2 border-dashed border-slate-600 rounded-lg p-4 text-center hover:border-cyan-400 hover:bg-slate-800/50 transition-all cursor-pointer relative group">
+                            <input type="file" id="input-photo" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewPhoto(this)">
+                            <div class="text-slate-400 group-hover:text-cyan-400 transition-colors">
+                                <i class="fas fa-cloud-upload-alt text-2xl mb-1"></i>
+                                <p class="text-xs" id="photo-label">Click to upload image</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="generateCard()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-900/50 mt-4 transform active:scale-95 transition-all flex justify-center items-center gap-2">
+                        <i class="fas fa-id-badge"></i> Generate ID Card
+                    </button>
+                    
+                    <button onclick="randomizeTheme()" class="w-full mt-2 text-xs text-slate-400 hover:text-white underline text-center block">
+                        Change Theme Color
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PREVIEW AREA -->
+        <div class="flex flex-col items-center w-full lg:w-auto">
+            <!-- Placeholder -->
+            <div id="placeholder-msg" class="text-slate-500 text-center p-12 border-2 border-dashed border-slate-800 rounded-3xl bg-slate-900/30 w-full max-w-[350px] flex flex-col items-center justify-center h-[600px]">
+                <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mb-4 text-slate-600">
+                    <i class="fas fa-user-lock text-3xl"></i>
+                </div>
+                <p class="font-[Poppins] text-sm">Verify enrollment to<br>unlock your ID card</p>
+            </div>
+
+            <!-- THE ID CARD -->
+            <div id="capture-area" class="mb-8 hidden">
+                <div id="id-card-container">
+                    <!-- Dynamic Backgrounds -->
+                    <div class="tech-grid"></div>
+                    <div class="circuit-bg"></div>
+                    
+                    <!-- Header -->
+                    <div class="relative z-20 pt-8 px-6 flex flex-col items-center gap-2">
+                        <div class="flex items-center gap-2">
+                            <img src="Logo.png" alt="Logo" class="h-8 w-auto object-contain drop-shadow-md" onerror="this.style.display='none'">
+                            <div class="text-2xl font-bold text-white tracking-wide drop-shadow-lg">
+                                VLSI<span class="text-cyan-300">easy</span>
+                            </div>
+                        </div>
+                        <div class="h-0.5 w-12 bg-white/20 rounded-full"></div>
+                    </div>
+
+                    <!-- Avatar -->
+                    <div class="avatar-container">
+                        <div class="avatar-img-box">
+                            <img id="card-photo" src="" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                    <!-- Identity -->
+                    <div class="text-center z-20 px-6 mb-2">
+                        <h2 id="card-name" class="text-2xl font-bold text-white leading-tight mb-2 uppercase tracking-wide drop-shadow-md"></h2>
+                        <div id="card-course-container" class="flex flex-wrap justify-center gap-1 opacity-90 max-h-12 overflow-hidden"></div>
+                    </div>
+
+                    <!-- Glass Details Panel -->
+                    <div class="glass-panel z-20">
+                        <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-3">
+                            <div>
+                                <p class="info-label text-cyan-300">Student ID</p>
+                                <p id="card-id" class="text-xl text-white font-bold tracking-widest font-mono"></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="info-label">Joined</p>
+                                <p id="card-joined" class="text-sm font-semibold text-white"></p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-y-3 gap-x-4 mb-4">
+                            <div>
+                                <p class="info-label">Year</p>
+                                <p id="card-year" class="info-value">2025</p>
+                            </div>
+                            <div>
+                                <p class="info-label">DOB</p>
+                                <p id="card-dob" class="info-value">--/--/----</p>
+                            </div>
+                            <div class="col-span-2">
+                                <p class="info-label">Phone</p>
+                                <p id="card-phone" class="info-value tracking-wide">--</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div>
+                                <p class="info-label">Email</p>
+                                <p id="card-email" class="email-value">user@example.com</p>
+                            </div>
+                            <div id="row-discord" class="hidden pt-1 border-t border-white/5">
+                                <p class="info-label flex items-center gap-1"><i class="fab fa-discord"></i> Discord</p>
+                                <p id="card-discord" class="text-xs text-white font-medium opacity-90">--</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute bottom-1 w-full text-center z-30">
+                        <p class="text-[8px] text-white/30 tracking-[0.3em] font-[Poppins]">© VLSIEASY COPYRIGHTS RESERVED</p>
+                        <p class="text-[7px] text-white/20 font-[Poppins]">www.vlsieasy.com</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Download Button -->
+            <div id="download-actions" class="hidden">
+                <button onclick="downloadCard()" class="bg-white text-slate-900 hover:bg-slate-200 font-bold py-3 px-8 rounded-full shadow-xl transition-transform hover:scale-105 flex items-center gap-2">
+                    <i class="fas fa-file-pdf"></i> Download Official ID (PDF)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwyKlERO-O339hyIFKqtoew3dIxfJrriKAO-uXRudF1Ro6aOQdZu3TKZgXIx-Y4-njJSg/exec"; 
+
+        // SERVER URL (Assuming local for development as per prompt req)
+        const EXPORT_SERVER_URL = "/api/generate";
+
+        let userData = {
+            name: "",
+            course: "",
+            email: "",
+            phone: "",
+            dob: "",
+            gender: "",
+            discord: "",
+            photoData: null
+        };
+
+        const THEMES = [
+            "linear-gradient(145deg, #0f172a 0%, #312e81 100%)",
+            "linear-gradient(145deg, #022c22 0%, #115e59 100%)",
+            "linear-gradient(145deg, #4c0519 0%, #7f1d1d 100%)",
+            "linear-gradient(145deg, #172554 0%, #1e40af 100%)",
+            "linear-gradient(145deg, #2e1065 0%, #581c87 100%)",
+            "linear-gradient(145deg, #451a03 0%, #7c2d12 100%)"
+        ];
+
+        const MALE_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+        const FEMALE_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"; 
+
+        document.getElementById('card-photo').src = MALE_AVATAR;
+
+        function randomizeTheme() {
+            const randomTheme = THEMES[Math.floor(Math.random() * THEMES.length)];
+            const container = document.getElementById('id-card-container');
+            container.style.background = randomTheme;
+        }
+
+        function getPersistentId(email) {
+            let hash = 0;
+            const str = email.toLowerCase().trim();
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; 
+            }
+            const positiveHash = Math.abs(hash);
+            const prefix = (positiveHash % 900) + 100; 
+            const suffix = (Math.floor(positiveHash / 1000) % 9000) + 1000;
+            return `${prefix}VLSIE${suffix}`;
+        }
+
+        async function verifyUser() {
+            const email = document.getElementById('input-email').value.trim();
+            const btn = document.getElementById('btn-verify');
+            const loader = document.getElementById('loader-verify');
+            const detailsSection = document.getElementById('details-section');
+
+            if (!email) { alert('Please enter an email.'); return; }
+
+            btn.disabled = true;
+            btn.classList.add('opacity-70');
+            loader.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=verify&email=${encodeURIComponent(email)}`);
+                const data = await response.json();
+                
+                if (data.result === 'success') {
+                    document.getElementById('verify-section').classList.add('hidden');
+                    
+                    document.getElementById('input-name').value = data.name;
+                    document.getElementById('input-phone').value = data.phone || "N/A";
+                    document.getElementById('input-dob').value = data.dob || "";
+                    document.getElementById('input-gender').value = data.gender || "male";
+
+                    userData = {
+                        name: data.name,
+                        course: data.course,
+                        email: data.email,
+                        phone: data.phone || "",
+                        dob: data.dob || "",
+                        gender: data.gender || "male",
+                        discord: "",
+                        photoData: null
+                    };
+
+                    detailsSection.classList.remove('hidden');
+                    randomizeTheme(); // Set initial theme
+                } else {
+                    alert('Email not found in our records.');
+                }
+            } catch (error) {
+                console.error(error);
+                if (email.includes('@')) {
+                     document.getElementById('verify-section').classList.add('hidden');
+                     userData = {
+                        name: email.split('@')[0].toUpperCase().replace('.', ' '),
+                        course: "VLSI Fundamentals",
+                        email: email,
+                        phone: "+91 9876543210",
+                        dob: "2000-01-01",
+                        gender: "male",
+                        discord: "",
+                        photoData: null
+                     };
+                     detailsSection.classList.remove('hidden');
+                     randomizeTheme();
+                } else {
+                    alert('Connection error.');
+                }
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-70');
+                loader.classList.add('hidden');
+            }
+        }
+
+        function previewPhoto(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    userData.photoData = e.target.result;
+                    document.getElementById('card-photo').src = e.target.result;
+                    document.getElementById('photo-label').textContent = input.files[0].name;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function generateCard() {
+            try {
+                userData.discord = document.getElementById('input-discord').value;
+                userData.dob = document.getElementById('input-dob').value;
+                
+                const genderInput = document.getElementById('input-gender');
+                if(genderInput && genderInput.value) {
+                    userData.gender = genderInput.value;
+                }
+                
+                randomizeTheme();
+
+                if (!userData.photoData) {
+                    const gender = (userData.gender || "male").toLowerCase();
+                    document.getElementById('card-photo').src = (gender === 'female') ? FEMALE_AVATAR : MALE_AVATAR;
+                }
+
+                document.getElementById('card-name').textContent = userData.name || "Student Name";
+                document.getElementById('card-id').textContent = getPersistentId(userData.email || "email");
+                document.getElementById('card-dob').textContent = userData.dob ? userData.dob.split('-').reverse().join('/') : "--/--/----";
+                document.getElementById('card-phone').textContent = userData.phone || "--";
+                document.getElementById('card-email').textContent = userData.email || "--";
+                
+                const discordRow = document.getElementById('row-discord');
+                if (userData.discord) {
+                    discordRow.classList.remove('hidden');
+                    document.getElementById('card-discord').textContent = userData.discord;
+                } else {
+                    discordRow.classList.add('hidden');
+                }
+
+                const container = document.getElementById('card-course-container');
+                container.innerHTML = ''; 
+                const courses = userData.course ? userData.course.split(',').map(s => s.trim()).filter(s => s) : ["VLSI Fundamentals"];
+                courses.slice(0, 3).forEach(course => {
+                    const pill = document.createElement('span');
+                    pill.className = 'course-tag';
+                    pill.textContent = course;
+                    container.appendChild(pill);
+                });
+
+                const today = new Date();
+                const joinedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+                document.getElementById('card-joined').textContent = joinedDate;
+
+                document.getElementById('placeholder-msg').classList.add('hidden');
+                document.getElementById('capture-area').classList.remove('hidden');
+                document.getElementById('download-actions').classList.remove('hidden');
+                
+                document.getElementById('capture-area').scrollIntoView({ behavior: 'smooth' });
+
+            } catch (err) {
+                console.error("Generate error:", err);
+                alert("An error occurred while generating the card. Please try refreshing the page.");
+            }
+        }
+
+        async function downloadCard() {
+            const cardElement = document.getElementById('id-card-container');
+            const btn = document.querySelector('#download-actions button');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+            btn.disabled = true;
+
+            try {
+                // Get the exact HTML of the card to replicate on server
+                // We must be careful to include inline styles (like the random background gradient)
+                const cardHTML = cardElement.outerHTML;
+
+                // Send to backend
+                const response = await fetch(EXPORT_SERVER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ html: cardHTML })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Server export failed');
+                }
+
+                // Handle PDF Blob
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `VLSI_ID_${userData.name.replace(/\s+/g, '_') || 'Student'}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Export failed. Ensure the local backend server (node server.js) is running on port 3000.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
